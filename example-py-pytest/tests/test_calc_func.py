@@ -35,8 +35,6 @@ def test_divide():
     value = divide(NUMBER_1, NUMBER_2)
     assert value == 1.5
 
-def test_power():
-    value = power(NUMBER_1, NUMBER_2)
 
 # Test for dividing by zero catches the exception
 # http://doc.pytest.org/en/latest/assert.html#assertions-about-expected-exceptions
