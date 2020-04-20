@@ -26,6 +26,3 @@ def maximum(a, b):
 
 def minimum(a, b):
     return a if a <= b else b
-
-def power(a,b):
-    return a ** b
