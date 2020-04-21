@@ -2,8 +2,9 @@ name: Pyinstaller
 
 on:
   push:
-    tags:
-      - '*.*.*'
+    branches: [ master ]
+#     tags:
+#       - '*.*.*'
 
 jobs:
   Windows:
@@ -28,17 +29,17 @@ jobs:
         pip install -r requirements.txt
     - name: build with pyinstaller
       run: |
-        pyinstaller example-py-pytest/script.py --onedir
+        pyinstaller example-py-pytest/script.py --onefile
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
-        name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
-        path: releases/script-${{ steps.tag.outputs.tag }}-win.tar.gz
+        name: script-${{ steps.tag.outputs.tag }}-win.exe
+        path: dist/script-${{ steps.tag.outputs.tag }}-win.exe
     - name: Upload checksum file
       uses: actions/upload-artifact@v1
       with:
         name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
-        path: releases/script-${{ steps.tag.outputs.tag }}-win.sha256sum
+        path: dist/script-${{ steps.tag.outputs.tag }}-win.sha256sum
         
   Linux:
     runs-on: ubuntu-latest
@@ -61,13 +62,13 @@ jobs:
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
-        name: script-${{ steps.tag.outputs.tag }}-linux.tar.gz
-        path: releases/script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+        name: script-${{ steps.tag.outputs.tag }}-linux
+        path: dist/script-${{ steps.tag.outputs.tag }}-linux
     - name: Upload checksum file
       uses: actions/upload-artifact@v1
       with:
         name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
-        path: releases/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+        path: dist/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
         
   Release:
     needs: [Windows, Linux]
