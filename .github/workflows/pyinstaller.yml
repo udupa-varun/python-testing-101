@@ -2,19 +2,22 @@ name: Pyinstaller
 
 on:
   push:
-    # branches to consider in the event; optional, defaults to all
-    branches:
-      - release
+    tags:
+      - '*.*.*'
 
 jobs:
-  update_release_draft:
-    runs-on: ${{ matrix.os }}
+  Windows:
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
         python-version: [3.7]
     steps:
     - uses: actions/checkout@v1
+    - name: Get tag
+      id: tag
+      shell: bash
+      run: |
+        echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -26,3 +29,104 @@ jobs:
     - name: build with pyinstaller
       run: |
         pyinstaller ./example-py-test/script.py --onedir
+    - name: Upload release file
+      uses: actions/upload-artifact@v1
+      with:
+        name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
+        path: releases/script-${{ steps.tag.outputs.tag }}-win.tar.gz
+    - name: Upload checksum file
+      uses: actions/upload-artifact@v1
+      with:
+        name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
+        path: releases/script-${{ steps.tag.outputs.tag }}-win.sha256sum
+        
+  Linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Build with pyinstaller
+      run: |
+        pyinstaller ./example-py-test/script.py --onefile
+    - name: Upload release file
+      uses: actions/upload-artifact@v1
+      with:
+        name: script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+        path: releases/script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+    - name: Upload checksum file
+      uses: actions/upload-artifact@v1
+      with:
+        name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+        path: releases/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+        
+  Release:
+    needs: [Windows, Linux]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download Windows release file
+        uses: actions/download-artifact@master
+        with:
+          name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
+          path: releases/script-${{ steps.tag.outputs.tag }}-win.tar.gz
+      - name: Download Linux release file
+        uses: actions/download-artifact@master
+        with:
+          name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
+          path: releases/script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          tag_name: $ {{ steps.tag.outputs.tag }}
+          release_name: $ {{steps.tag.outputs.tag }}
+          draft: false
+          prerelease: true
+      - name: Upload Windows release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: releases/script-${{ steps.tag.outputs.tag }}-win.tar.gz/script-${{ steps.tag.outputs.tag }}-win.tar.gz
+          asset_name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
+          asset_content_type: application/gzip
+      - name: Upload Windows checksum file asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: releases/script-${{ steps.tag.outputs.tag }}-win.sha256sum/script-${{ steps.tag.outputs.tag }}-win.sha256sum
+          asset_name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
+          asset_content_type: text/pain
+      - name: Upload Linux release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: releases/script-${{ steps.tag.outputs.tag }}-linux.tar.gz/script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+          asset_name: script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+          asset_content_type: application/gzip
+      - name: Upload Linux checksum file asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: releases/script-${{ steps.tag.outputs.tag }}-linux.sha256sum/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+          asset_name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+          asset_content_type: text/pain
