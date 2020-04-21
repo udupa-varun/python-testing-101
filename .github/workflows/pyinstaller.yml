@@ -2,7 +2,6 @@ name: Pyinstaller
 
 on:
   push:
-#     branches: [ master ]
     tags:
       - '*.*.*'
 
@@ -35,11 +34,11 @@ jobs:
       with:
         name: script-${{ steps.tag.outputs.tag }}-win.exe
         path: dist/script.exe
-    - name: Upload checksum file
-      uses: actions/upload-artifact@v1
-      with:
-        name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
-        path: dist/script-${{ steps.tag.outputs.tag }}-win.sha256sum
+#     - name: Upload checksum file
+#       uses: actions/upload-artifact@v1
+#       with:
+#         name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
+#         path: dist/script-${{ steps.tag.outputs.tag }}-win.sha256sum
         
   Linux:
     runs-on: ubuntu-latest
@@ -63,12 +62,12 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: script-${{ steps.tag.outputs.tag }}-linux
-        path: dist/script-${{ steps.tag.outputs.tag }}-linux
-    - name: Upload checksum file
-      uses: actions/upload-artifact@v1
-      with:
-        name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
-        path: dist/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+        path: dist/script
+#     - name: Upload checksum file
+#       uses: actions/upload-artifact@v1
+#       with:
+#         name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
+#         path: dist/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
         
   Release:
     needs: [Windows, Linux]
