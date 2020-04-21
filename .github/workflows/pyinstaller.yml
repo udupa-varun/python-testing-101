@@ -34,7 +34,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: script-${{ steps.tag.outputs.tag }}-win.exe
-        path: dist/script-${{ steps.tag.outputs.tag }}-win.exe
+        path: dist/script.exe
     - name: Upload checksum file
       uses: actions/upload-artifact@v1
       with:
