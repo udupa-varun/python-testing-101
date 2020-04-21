@@ -28,7 +28,7 @@ jobs:
         pip install -r requirements.txt
     - name: build with pyinstaller
       run: |
-        pyinstaller ./example-py-test/script.py --onedir
+        pyinstaller example-py-test/script.py --onedir
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
@@ -57,7 +57,7 @@ jobs:
         pip install -r requirements.txt
     - name: Build with pyinstaller
       run: |
-        pyinstaller ./example-py-test/script.py --onefile
+        pyinstaller example-py-test/script.py --onefile
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
