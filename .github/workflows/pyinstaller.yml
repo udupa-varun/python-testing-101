@@ -2,8 +2,9 @@ name: Pyinstaller
 
 on:
   push:
-    tags:
-      - '*.*.*'
+    branches: [ master ]
+#     tags:
+#       - '*.*.*'
 
 jobs:
   Windows:
@@ -28,6 +29,9 @@ jobs:
         pip install -r requirements.txt
     - name: build with pyinstaller
       run: |
+        dir
+        cd ..
+        dir
         pyinstaller example-py-test/script.py --onedir
     - name: Upload release file
       uses: actions/upload-artifact@v1
@@ -57,6 +61,9 @@ jobs:
         pip install -r requirements.txt
     - name: Build with pyinstaller
       run: |
+        ls
+        cd ..
+        ls
         pyinstaller example-py-test/script.py --onefile
     - name: Upload release file
       uses: actions/upload-artifact@v1
