@@ -39,7 +39,7 @@ jobs:
 #       with:
 #         name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
 #         path: dist/script-${{ steps.tag.outputs.tag }}-win.sha256sum
-        
+
   Linux:
     runs-on: ubuntu-latest
     strategy:
@@ -73,11 +73,11 @@ jobs:
 #       with:
 #         name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
 #         path: dist/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
-        
+
   Release:
     needs: [Windows, Linux]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -100,7 +100,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with: 
+        with:
           tag_name: $ {{ steps.tag.outputs.tag }}
           release_name: $ {{steps.tag.outputs.tag }}
           draft: true
@@ -109,10 +109,10 @@ jobs:
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with: 
+        with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/script-${{ steps.tag.outputs.tag }}-win.tar.gz/script-${{ steps.tag.outputs.tag }}-win.tar.gz
-          asset_name: script-${{ steps.tag.outputs.tag }}-win.tar.gz
+          asset_path: dist/script.exe
+          asset_name: script-${{ steps.tag.outputs.tag }}-win.exe
           asset_content_type: application/gzip
 #       - name: Upload Windows checksum file asset
 #         uses: actions/upload-release-asset@v1.0.1
@@ -127,10 +127,10 @@ jobs:
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with: 
+        with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/script-${{ steps.tag.outputs.tag }}-linux.tar.gz/script-${{ steps.tag.outputs.tag }}-linux.tar.gz
-          asset_name: script-${{ steps.tag.outputs.tag }}-linux.tar.gz
+          asset_path: dist/script
+          asset_name: script-${{ steps.tag.outputs.tag }}-linux
           asset_content_type: application/gzip
 #       - name: Upload Linux checksum file asset
 #         uses: actions/upload-release-asset@v1.0.1
