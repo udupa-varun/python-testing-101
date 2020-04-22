@@ -91,7 +91,7 @@ jobs:
       - name: Download Windows release file
         uses: actions/download-artifact@master
         with:
-          name: script-${{ steps.tag.outputs.tag }}-win.exe
+          name: script-${{ steps.tag.outputs.tag }}-win.zip
           path: ./
       - name: Download Linux release file
         uses: actions/download-artifact@master
