@@ -107,15 +107,15 @@ jobs:
           release_name: $ {{steps.tag.outputs.tag }}
           draft: true
           prerelease: true
-      - name: Upload Windows release
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/script.exe
-          asset_name: ./script-${{ steps.tag.outputs.tag }}-win.exe/script-${{ steps.tag.outputs.tag }}-win.exe
-          asset_content_type: application/gzip
+      # - name: Upload Windows release
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: dist/script.exe
+      #     asset_name: ./script-${{ steps.tag.outputs.tag }}-win.exe/script-${{ steps.tag.outputs.tag }}-win.exe
+      #     asset_content_type: application/gzip
 
       - name: Upload Linux release
         uses: actions/upload-release-asset@v1.0.1
