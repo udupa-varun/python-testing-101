@@ -62,12 +62,14 @@ jobs:
         pip install -r requirements.txt
     - name: Build with pyinstaller
       run: |
-        pyinstaller example-py-pytest/script.py --onefile
+        pyinstaller example-py-pytest/script.py --onedir
+        zip -r script-${{ steps.tag.outputs.tag }}-linux.zip dist
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
-        name: script-${{ steps.tag.outputs.tag }}-linux
-        path: dist/script
+        name: script-${{ steps.tag.outputs.tag }}-linux.zip
+        # path: dist/script
+        path: ./script-${{ steps.tag.outputs.tag }}-linux.zip
 #     - name: Upload checksum file
 #       uses: actions/upload-artifact@v1
 #       with:
@@ -93,8 +95,8 @@ jobs:
       - name: Download Linux release file
         uses: actions/download-artifact@master
         with:
-          name: script-${{ steps.tag.outputs.tag }}-linux
-          path: dist/script-${{ steps.tag.outputs.tag }}-linux
+          name: script-${{ steps.tag.outputs.tag }}-linux.zip
+          path: ./script-${{ steps.tag.outputs.tag }}-linux
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -105,33 +107,25 @@ jobs:
           release_name: $ {{steps.tag.outputs.tag }}
           draft: true
           prerelease: true
-      - name: Upload Windows release
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/script.exe
-          asset_name: script-${{ steps.tag.outputs.tag }}-win.exe
-          asset_content_type: application/gzip
-#       - name: Upload Windows checksum file asset
-#         uses: actions/upload-release-asset@v1.0.1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           upload_url: ${{ steps.create_release.outputs.upload_url }}
-#           asset_path: releases/script-${{ steps.tag.outputs.tag }}-win.sha256sum/script-${{ steps.tag.outputs.tag }}-win.sha256sum
-#           asset_name: script-${{ steps.tag.outputs.tag }}-win.sha256sum
-#           asset_content_type: text/pain
+      # - name: Upload Windows release
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: dist/script.exe
+      #     asset_name: script-${{ steps.tag.outputs.tag }}-win.exe
+      #     asset_content_type: application/gzip
+
       - name: Upload Linux release
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/script
-          asset_name: script-${{ steps.tag.outputs.tag }}-linux
-          asset_content_type: application/gzip
+          asset_path: ./script-${{ steps.tag.outputs.tag }}-linux.zip
+          asset_name: script-${{ steps.tag.outputs.tag }}-linux.zip
+          asset_content_type: application/zip
 #       - name: Upload Linux checksum file asset
 #         uses: actions/upload-release-asset@v1.0.1
 #         env:
