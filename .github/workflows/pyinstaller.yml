@@ -29,7 +29,7 @@ jobs:
     - name: build with pyinstaller
       run: |
         pyinstaller example-py-pytest/script.py --onedir
-        zip -r script-${{ steps.tag.outputs.tag }}-win.zip dist
+        powershell Compress-Archive -Path 'dist' -DestinationPath script-${{ steps.tag.outputs.tag }}-win.zip
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
