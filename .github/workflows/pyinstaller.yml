@@ -29,7 +29,7 @@ jobs:
     - name: build with pyinstaller
       run: |
         pyinstaller example-py-pytest/script.py --onedir
-        powershell Compress-Archive -Path 'dist' -DestinationPath script-${{ steps.tag.outputs.tag }}-win.zip
+        powershell Compress-Archive -Path .\dist -DestinationPath script-${{ steps.tag.outputs.tag }}-win.zip
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
@@ -127,12 +127,3 @@ jobs:
           asset_path: ./script-${{ steps.tag.outputs.tag }}-linux.zip
           asset_name: script-${{ steps.tag.outputs.tag }}-linux.zip
           asset_content_type: application/zip
-#       - name: Upload Linux checksum file asset
-#         uses: actions/upload-release-asset@v1.0.1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           upload_url: ${{ steps.create_release.outputs.upload_url }}
-#           asset_path: releases/script-${{ steps.tag.outputs.tag }}-linux.sha256sum/script-${{ steps.tag.outputs.tag }}-linux.sha256sum
-#           asset_name: script-${{ steps.tag.outputs.tag }}-linux.sha256sum
-#           asset_content_type: text/pain
