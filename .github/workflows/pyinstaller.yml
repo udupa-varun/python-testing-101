@@ -18,18 +18,22 @@ jobs:
       shell: bash
       run: |
         echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
     - name: build with pyinstaller
       run: |
         pyinstaller example-py-pytest/script.py --onedir
         powershell Compress-Archive -Path .\dist -DestinationPath script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-win.zip
+
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
@@ -49,18 +53,22 @@ jobs:
       shell: bash
       run: |
         echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
     - name: Build with pyinstaller
       run: |
         pyinstaller example-py-pytest/script.py --onedir
         zip -r script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-linux.zip dist
+
     - name: Upload release file
       uses: actions/upload-artifact@v1
       with:
@@ -71,27 +79,8 @@ jobs:
   Release:
     needs: [Windows, Linux]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Get tag
-        id: tag
-        run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
-      - name: Download Windows release file
-        uses: actions/download-artifact@master
-        with:
-          name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-win.zip
-          path: ./
-      - name: Download Linux release file
-        uses: actions/download-artifact@master
-        with:
-          name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-linux.zip
-          path: ./
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -99,15 +88,68 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: $ {{ steps.tag.outputs.tag }}
-          release_name: $ {{steps.tag.outputs.tag }}
+          release_name: Release $ {{steps.tag.outputs.tag }}
           draft: false
           prerelease: true
+
+      - name: Output Release URL File
+        run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+
+      - name: Save Release URL File for publish
+        uses: actions/upload-artifact@v1
+        with:
+          name: release_url
+          path: release_url.txt
+
+  Publish:
+    needs: [Release]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get tag
+        id: tag
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          echo ::set-output name=file_name::${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+        env:
+          TAG_REF_NAME: ${{ github.ref }}
+          REPOSITORY_NAME: ${{ github.repository }}
+
+      - name: Download Windows release file
+        uses: actions/download-artifact@master
+        with:
+          name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-win.zip
+          path: ./
+
+      - name: Download Linux release file
+        uses: actions/download-artifact@master
+        with:
+          name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-linux.zip
+          path: ./
+
       - name: Upload Windows release
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
           asset_path: ./script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-win.zip
           asset_name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-win.zip
           asset_content_type: application/zip
@@ -117,7 +159,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
           asset_path: ./script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-linux.zip
           asset_name: script-${{ steps.tag.outputs.tag }}-py${{ matrix.python-version }}-linux.zip
           asset_content_type: application/zip
