@@ -82,9 +82,9 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7]
-        include:
-          - python-version: 3.7
-            upload: true
+        # include:
+        #   - python-version: 3.7
+        #     upload: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -108,14 +108,14 @@ jobs:
 
       - name: Create release
         id: create_release
-        if: matrix.upload
+        # if: matrix.upload
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: $ {{ steps.tag.outputs.tag }}
           release_name: Release $ {{steps.tag.outputs.tag }}
-          draft: false
+          draft: true
           prerelease: true
 
       - name: Upload Windows release
