@@ -1,4 +1,4 @@
-name: Puslish
+name: Publish
 
 on:
   push:
